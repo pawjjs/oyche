@@ -1,4 +1,4 @@
 ID: 1
-Name: Janek
-Email: Janek@gmail.com
+Name: Kuba
+Email: bandura@gmail.com
 Password: 1234
