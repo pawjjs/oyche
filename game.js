@@ -24,7 +24,7 @@ export default class Game {
                 message = `${player.colors} wyrzucil 6,opuscil baze`;
                 this.checkCapture(player);
             } else {
-                message = `${player.name} wyrzucil ${roll} (musisz wyrzucic 6)`;
+                message = `${player.color} wyrzucil ${roll} (musisz wyrzucic 6)`;
             }
         } else {
             let oldPos = player.position;
