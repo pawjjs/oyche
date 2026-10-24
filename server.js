@@ -1,6 +1,6 @@
 import express from "express";
-import { appendFile } from 'node:fs/promises'
 import db from "./db.js";
+import { appendFile } from 'node:fs/promises';
 
 const app = express();
 const PORT = 3000;
