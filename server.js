@@ -1,4 +1,4 @@
-import { openDb } from "./db.js";
+import db from "./db.js";
 import express from "express";
 import { appendFile } from 'node:fs/promises'
 
