@@ -1,29 +1,16 @@
 {
   "name": "ppawjs",
   "version": "1.0.0",
-  "description": "Nazwa zespołu: Oyche\r Skład zespołu:\r 1. Jan Praga (Frontend)\r 2. Daniel Wawrzos - Lider (Backend)\r 3. Michał Chomontowski (Backend)\r 4. Anna Kalinowska (Frontend)\r 5. Jakub Bandosz (Backend + Baza)",
+  "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "type": "module",
   "dependencies": {
     "expres": "^0.0.5",
     "express": "^5.3.0",
-    "socket.io": "^4.8.4",
-    "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pawjjs/oyche.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/pawjjs/oyche/issues"
-  },
-  "homepage": "https://github.com/pawjjs/oyche#readme"
+  }
 }
