@@ -9,8 +9,6 @@
   "keywords": [],
   "type": "module",
   "dependencies": {
-    "expres": "^0.0.5",
-    "express": "^5.3.0",
-    "sqlite3": "^6.0.1"
+    "expres": "^0.0.5"
   }
 }
