@@ -1,42 +1,32 @@
 import express from "express";
-import { open } from "sqlite";
-import sqlite3 from "sqlite3";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import db from "./db.js";
+import { appendFile } from 'node:fs/promises';
 
 const app = express();
 const PORT = 3000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const sqliteDriver = sqlite3.verbose();
-
-const dbPromise = open({
-  filename: join(__dirname, 'Chinczyk.sqlite'),
-  driver: sqliteDriver.Database
-});
-
-app.use(express.json());
+app.use(express.json())
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
 });
 
-app.get("/users", async (req, res) => {
+app.post("/dodaj", async (req, res) => {
+  const { imie } = req.body;
+
+  if (!imie || imie.trim() === ""){
+    return res.status(400).send("Błąd: Musisz podać imię w formacie JSON");
+  }
+
   try {
-    const db = await dbPromise;
-    const users = await db.all("SELECT id, username, email FROM users");
-    res.json(users);
+    await appendFile('imie.txt', imie.trim() + "\n");
+    res.status(201).send(`Dodane do pliku: ${imie}`);  
   } catch (error) {
-    console.error("Szczegóły błędu:", error);
-    res.status(500).json({
-      error: "Błąd podczas pobierania użytkowników",
-      message: error.message
-    });
+    console.error("ERROR", error);
+    res.status(500).send("Blad servera");
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, () => { 
   console.log(`Server running at http://localhost:${PORT}`);
 });
