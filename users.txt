@@ -1,4 +1,0 @@
-ID: 1
-Name: Kuba
-Email: bandura@gmail.com
-Password: 1234

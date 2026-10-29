@@ -1,6 +1,9 @@
 import express from "express";
-import db from "./db.js";
-import { appendFile } from 'node:fs/promises';
+import db from "./db.js"; 
+import http from 'http';
+import path from 'path';
+import { randomBytes } from "node:crypto";
+
 
 class User{
   constructor(id, username, email, password_hash){
@@ -58,6 +61,7 @@ function logState() {
 }
 
 const app = express();
+const server = http.createServer(app)
 const PORT = 3000;
 
 app.use(express.json())
@@ -70,7 +74,6 @@ app.get("/register", async (req, res) => {
   const {id, username, email, password_hash } = req.query;
   let newUser = new User(id, username, email, password_hash);
   users.push(newUser); 
-  await appendFile('users.txt', 'ID: ' + newUser.id + '\nName: ' +  newUser.username + '\nEmail: ' + newUser.email +  '\nPassword: '+ newUser.password_hash + '\n');
   res.send(`Witaj ${newUser.username}! Znam twoje hasło ${newUser.password_hash}`);
 
   logState();
@@ -82,13 +85,13 @@ app.get("/login", async (req, res) =>{
   if(loggedIn == true){
     res.send(`Już jesteś zalogowany ${username}`)
   }else{
-    let userFound = {};
+    let userFound = users.find(x => x.username === username);
 
-    users.forEach((x) => {
-      if(x.username == username){
-        userFound = x;
-      }
-    });
+    // users.forEach((x) => {
+    //   if(x.username == username){
+    //     userFound = x;
+    //   }
+    // });
 
     if(!userFound){
       res.send(`Nie znaleziono użytkownika o nazwie ${username}`);
@@ -114,23 +117,29 @@ app.get("/logout", async (req, res) =>{
   logState();
 });
 
-app.get("/game", async (req, res) => {
+function generatorKodow(){
+  return randomBytes(3).toString('hex');
+}
+
+app.get("/newGame", async (req, res) => {
+  const wygenerowanyKod = generatorKodow()
+
   if(loggedIn == false){
     res.send(`Zaloguj się!!!`);
   }else{
-    const {id} = req.query;
+    // const {id} = req.query;
     let isExisting = false;
     games.forEach(singleGame => {
-      if(singleGame.id == id){
+      if(singleGame.id == wygenerowanyKod){
         isExisting = true;
       }
     });
 
     if (isExisting == false){
-      games.push(new Game(id, currentlyLogged));
-      res.send(`Stworzono grę o ID ${id} i należy ona do ${currentlyLogged.username}!`);
+      games.push(new Game(wygenerowanyKod, currentlyLogged));
+      res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
     }else{
-      res.send(`Gra o ID ${id} już istnieje!`);
+      res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
     }
   }
   
@@ -166,22 +175,63 @@ app.get("/game/:id/start", async (req, res) => {
   logState();
 });
 
-app.post("/dodaj", async (req, res) => {
-  const { imie } = req.body;
+app.get("/game/:id/join", async (req, res) => {
+  const {id} = req.params;
+  
+  const game = games.find(g => g.id === id) 
 
-  if (!imie || imie.trim() === ""){
-    return res.status(400).send("Błąd: Musisz podać imię w formacie JSON");
+  if(!loggedIn){
+    return res.status(401).send("Nie jestes zalogowany!");
   }
 
-  try {
-    await appendFile('imie.txt', imie.trim() + "\n");
-    res.status(201).send(`Dodane do pliku: ${imie}`);  
-  } catch (error) {
-    console.error("ERROR", error);
-    res.status(500).send("Blad servera");
+  if(!game){
+    return res.status(404).send("Nie ma takiej gry!");
   }
+
+  if(game.players.find(p => p === currentlyLogged)){
+    return res.status(400).send("Juz dolaczyles!");
+  }
+
+  //tymczasowe
+  if(game.round > 0){
+    return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
+  }
+
+  game.players.push(currentlyLogged);
+  res.send(`Dołączono do gry ${game.id}!`);
+
+  logState()
+})
+
+app.get("/game/:id/start", async (req, res) => {
+  if(loggedIn == false){
+    res.send(`Na początek się zaloguj!`);
+  }else{
+    const {id} = req.params;
+    let isExisting = false;
+    let gameToStart = {};
+    games.forEach(singleGame => {
+      if(singleGame.id == id){
+        isExisting = true;
+        gameToStart = singleGame;
+      }
+    });
+
+    if (isExisting == false){
+      res.send(`Nie ma gry o ID ${id}!`);
+    }else{
+      if(gameToStart.owner.username == currentlyLogged.username){
+        res.send(`Rozpoczęto grę o ID ${id}`);
+        gameToStart.round = 1;
+      }else{
+        res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
+      }
+    }
+  }
+
+  logState();
 });
 
-app.listen(PORT, () => { 
+server.listen(PORT, () => { 
   console.log(`Server running at http://localhost:${PORT}`);
 });
