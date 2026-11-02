@@ -2,7 +2,7 @@ import express from "express";
 import db from "./db.js"; 
 import http from 'http';
 import path from 'path';
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 
 
 class User{
@@ -130,59 +130,65 @@ function generatorKodow(){
   return randomBytes(3).toString('hex');
 }
 
-app.get("/newGame", async (req, res) => {
-  const wygenerowanyKod = generatorKodow()
+// app.get("/newGame", async (req, res) => {
+//   const wygenerowanyKod = generatorKodow()
+//
+//   if(loggedIn == false){
+//     res.send(`Zaloguj się!!!`);
+//   }else{
+//     // const {id} = req.query;
+//     let isExisting = false;
+//     games.forEach(singleGame => {
+//       if(singleGame.id == wygenerowanyKod){
+//         isExisting = true;
+//       }
+//     });
+//
+//     if (isExisting == false){
+//       games.push(new Game(wygenerowanyKod, currentlyLogged));
+//       res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
+//     }else{
+//       res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
+//     }
+//   }
+//
+//   logState();
+// });
 
-  if(loggedIn == false){
-    res.send(`Zaloguj się!!!`);
-  }else{
-    // const {id} = req.query;
-    let isExisting = false;
-    games.forEach(singleGame => {
-      if(singleGame.id == wygenerowanyKod){
-        isExisting = true;
-      }
-    });
 
-    if (isExisting == false){
-      games.push(new Game(wygenerowanyKod, currentlyLogged));
-      res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
-    }else{
-      res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
-    }
-  }
-  
-  logState();
-});
-
-app.get("/game/:id/start", async (req, res) => {
-  if(loggedIn == false){
-    res.send(`Na początek się zaloguj!`);
-  }else{
-    const {id} = req.params;
-    let isExisting = false;
-    let gameToStart = {};
-    games.forEach(singleGame => {
-      if(singleGame.id == id){
-        isExisting = true;
-        gameToStart = singleGame;
-      }
-    });
-
-    if (isExisting == false){
-      res.send(`Nie ma gry o ID ${id}!`);
-    }else{
-      if(gameToStart.user.username == currentlyLogged.username){
-        res.send(`Rozpoczęto grę o ID ${id}`);
-        gameToStart.round = 1;
-      }else{
-        res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
-      }
-    }
+app.get("/newGame", async (req,res) => {
+  if (!loggedIn || !currentlyLogged) {
+    return res.send("Zaloguj się!!!");
   }
 
-  logState();
+  const wygenerowanyKod = generatorKodow();
+
+
+
+  try {
+    await db.run(
+        `INSERT INTO GAMES (id, host_id, status, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
+        [wygenerowanyKod, currentlyLogged.id, 'waiting']
+    );
+
+    await db.run(
+        `INSERT INTO GAME_PLAYERS (game_id, user_id, color, position) VALUES (?, ?, ?, ?)`,
+        [wygenerowanyKod, currentlyLogged.id, 'Czerwony', -1]
+    );
+
+    await db.run(
+        `INSERT INTO GAME_STATES (game_id, board_state, current_turn_user_id) VALUES (?, ?, ?)`,
+        [wygenerowanyKod, JSON.stringify({ board: [] }), currentlyLogged.id]
+    );
+
+    res.send(`Sukces! Stworzono grę o ID: ${wygenerowanyKod} dla hosta: ${currentlyLogged.id}`);
+  } catch (err) {
+    res.status(500).send("Błąd podczas tworzenia gry w bazie: " + err.message);
+  }
 });
+
+
+
 
 app.get("/game/:id/join", async (req, res) => {
   const {id} = req.params;
