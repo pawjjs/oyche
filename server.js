@@ -1,9 +1,9 @@
-import express from "express"; 
+import express from "express";
+import db from "./db.js"; 
 import http from 'http';
 import path from 'path';
-import { appendFile } from 'node:fs/promises'
-
 import { randomBytes } from "node:crypto";
+
 
 class User{
   constructor(id, username, email, password_hash){
@@ -73,6 +73,8 @@ const app = express();
 const server = http.createServer(app)
 const PORT = 3000;
 
+app.use(express.json())
+
 app.get("/", (req, res) => {
   res.send("Lets play some chinese guy!");
 });
@@ -81,7 +83,6 @@ app.get("/register", async (req, res) => {
   const {id, username, email, password_hash } = req.query;
   let newUser = new User(id, username, email, password_hash);
   users.push(newUser); 
-  await appendFile('users.txt', 'ID: ' + newUser.id + '\nName: ' +  newUser.username + '\nEmail: ' + newUser.email +  '\nPassword: '+ newUser.password_hash + '\n');
   res.send(`Witaj ${newUser.username}! Znam twoje hasło ${newUser.password_hash}`);
 
   logState();
@@ -126,13 +127,8 @@ app.get("/logout", async (req, res) =>{
 });
 
 function generatorKodow(){
-
   return randomBytes(3).toString('hex');
 }
-
-// app.get("/kod", (req, res) => {
-//   res.send(generatorKodow())
-// })
 
 app.get("/newGame", async (req, res) => {
   const wygenerowanyKod = generatorKodow()
@@ -156,6 +152,35 @@ app.get("/newGame", async (req, res) => {
     }
   }
   
+  logState();
+});
+
+app.get("/game/:id/start", async (req, res) => {
+  if(loggedIn == false){
+    res.send(`Na początek się zaloguj!`);
+  }else{
+    const {id} = req.params;
+    let isExisting = false;
+    let gameToStart = {};
+    games.forEach(singleGame => {
+      if(singleGame.id == id){
+        isExisting = true;
+        gameToStart = singleGame;
+      }
+    });
+
+    if (isExisting == false){
+      res.send(`Nie ma gry o ID ${id}!`);
+    }else{
+      if(gameToStart.user.username == currentlyLogged.username){
+        res.send(`Rozpoczęto grę o ID ${id}`);
+        gameToStart.round = 1;
+      }else{
+        res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
+      }
+    }
+  }
+
   logState();
 });
 
@@ -215,7 +240,6 @@ app.get("/game/:id/start", async (req, res) => {
 
   logState();
 });
-
 
 server.listen(PORT, () => { 
   console.log(`Server running at http://localhost:${PORT}`);
