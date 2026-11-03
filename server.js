@@ -191,33 +191,37 @@ app.get("/newGame", async (req,res) => {
 
 
 app.get("/game/:id/join", async (req, res) => {
-  const {id} = req.params;
-  
-  const game = games.find(g => g.id === id) 
+  const { id } = req.params;
 
-  if(!loggedIn){
-    return res.status(401).send("Nie jestes zalogowany!");
+  if (!loggedIn || !currentlyLogged) {
+    return res.status(401).send("Nie jesteś zalogowany!");
   }
 
-  if(!game){
-    return res.status(404).send("Nie ma takiej gry!");
+  try {
+    const game = await db.get(`SELECT * FROM GAMES WHERE id = ?`, [id]);
+    console.log(game);
+
+    if (!game) {
+      return res.status(404).send(`Nie ma gry o ID: ${id}!`);
+    }
+
+    if (game.status !== 'waiting') {
+      return res.status(400).send("Gra się już rozpoczęła. Nie można do niej dołączyć!");
+    }
+    console.log("Status gry w bazie:", game.status);
+
+    await db.run(
+        `INSERT INTO GAME_PLAYERS (game_id, user_id, color, position) VALUES (?, ?, ?, ?)`,
+        [id, currentlyLogged.id, 'Zielony', -1]
+    );
+
+    res.send(`Dołączono do gry o ID: ${id}!`);
+  } catch (err) {
+    res.status(400).send("Błąd podczas dołączania do gry (może już w niej jesteś?): " + err.message);
   }
 
-  if(game.players.find(p => p === currentlyLogged)){
-    return res.status(400).send("Juz dolaczyles!");
-  }
-
-  //tymczasowe
-  if(game.round > 0){
-    return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
-  }
-
-  game.players.push(currentlyLogged);
-  res.send(`Dołączono do gry ${game.id}!`);
-
-  logState()
-})
-
+  logState();
+});
 app.get("/game/:id/start", async (req, res) => {
   if(loggedIn == false){
     res.send(`Na początek się zaloguj!`);
