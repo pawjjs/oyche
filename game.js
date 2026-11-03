@@ -4,55 +4,57 @@ export default class Game {
     constructor(playerCount = 2) {
         this.boardSize = 40;
         this.players = [];
+
         const colors = ['Czerwony', 'Niebieski', 'Zielony', 'Zolty'];
         const symbols = ['[1]', '[2]', '[3]', '[4]'];
 
         for (let i = 0; i < playerCount; i++) {
             this.players.push(new Player(colors[i], symbols[i]));
         }
+
         this.currentTurnIndex = 0;
     }
 
     rollTheDice() {
-        let player = this.players[this.currentTurnIndex];
-        let roll = Math.floor(Math.random() * 6) + 1;
+        const player = this.players[this.currentTurnIndex];
+        const roll = Math.floor(Math.random() * 6) + 1;
         let message = '';
 
         if (player.position === -1) {
             if (roll === 6) {
                 player.position = 0;
-                message = `${player.colors} wyrzucil 6,opuscil baze`;
+                message = `${player.name} wyrzucił 6, opuścił bazę`;
                 this.checkCapture(player);
             } else {
-                message = `${player.color} wyrzucil ${roll} (musisz wyrzucic 6)`;
+                message = `${player.name} wyrzucił ${roll} (musisz wyrzucić 6)`;
             }
         } else {
-            let oldPos = player.position;
-            let newPos = (player.position + roll) % this.boardSize;
+            const oldPos = player.position;
+            const newPos = (player.position + roll) % this.boardSize;
+
             player.position = newPos;
-            message = `${player.colors} przesunal sie z ${oldPos} na ${newPos} (rzut: ${roll}).`;
+
+            message = `${player.name} przesunął się z ${oldPos} na ${newPos} (rzut: ${roll}).`;
+
             this.checkCapture(player);
         }
 
-        this.currentTurnIndex++;
+        this.currentTurnIndex =
+            (this.currentTurnIndex + 1) % this.players.length;
 
-        if (this.currentTurnIndex >= this.players.length) {
-            this.currentTurnIndex = 0;
-
-        return { roll, message, players: this.players, turn: this.currentTurnIndex };
+        return {
+            roll,
+            message,
+            players: this.players,
+            turn: this.currentTurnIndex
+        };
     }
-}
 
-checkCapture(movingPlayer) {
-        let victim = null;
-        for (let i = 0; i < this.players.length; i++) {
-            let p = this.players[i];
-
-            if (p !== movingPlayer && p.position === movingPlayer.position) {
-                victim = p;
-                break;
-            }
-        }
+    checkCapture(movingPlayer) {
+        const victim = this.players.find(
+            p => p !== movingPlayer &&
+                 p.position === movingPlayer.position
+        );
 
         if (victim) {
             victim.position = -1;
