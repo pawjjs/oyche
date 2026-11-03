@@ -9,8 +9,21 @@
   "keywords": [],
   "type": "module",
   "dependencies": {
-    "expres": "^0.0.5",
     "express": "^5.3.0",
-    "socket.io": "^4.8.4"
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pawjjs/oyche.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pawjjs/oyche/issues"
+  },
+  "homepage": "https://github.com/pawjjs/oyche#readme",
+  "allowScripts": {
+    "sqlite3@6.0.1": true
   }
 }
