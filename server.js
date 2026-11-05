@@ -3,7 +3,7 @@ import db from "./db.js";
 import http from 'http';
 import path from 'path';
 import { randomBytes } from "node:crypto";
-
+import { WebSocketServer } from "ws";
 
 class User{
   constructor(id, username, email, password_hash){
@@ -72,8 +72,6 @@ function logState() {
 const app = express();
 const server = http.createServer(app)
 const PORT = 3000;
-
-app.use(express.json())
 
 app.get("/", (req, res) => {
   res.send("Lets play some chinese guy!");
@@ -155,35 +153,6 @@ app.get("/newGame", async (req, res) => {
   logState();
 });
 
-app.get("/game/:id/start", async (req, res) => {
-  if(loggedIn == false){
-    res.send(`Na początek się zaloguj!`);
-  }else{
-    const {id} = req.params;
-    let isExisting = false;
-    let gameToStart = {};
-    games.forEach(singleGame => {
-      if(singleGame.id == id){
-        isExisting = true;
-        gameToStart = singleGame;
-      }
-    });
-
-    if (isExisting == false){
-      res.send(`Nie ma gry o ID ${id}!`);
-    }else{
-      if(gameToStart.user.username == currentlyLogged.username){
-        res.send(`Rozpoczęto grę o ID ${id}`);
-        gameToStart.round = 1;
-      }else{
-        res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
-      }
-    }
-  }
-
-  logState();
-});
-
 app.get("/game/:id/join", async (req, res) => {
   const {id} = req.params;
   
@@ -239,6 +208,15 @@ app.get("/game/:id/start", async (req, res) => {
   }
 
   logState();
+});
+
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (client) => {
+  client.send('Siema');
+  client.on('message', (msg) => {
+    console.log(`${msg}`);
+  });
 });
 
 server.listen(PORT, () => { 
