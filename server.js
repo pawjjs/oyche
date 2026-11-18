@@ -4,6 +4,7 @@ import http from 'http';
 import path from 'path';
 import { randomBytes } from "node:crypto";
 import { WebSocketServer } from "ws";
+import GameLogic from "./gameLogic.js";
 
 class User{
   constructor(id, username, email, password_hash){
@@ -32,6 +33,7 @@ class Game{
     this.round = 0;
     this.owner = owner
     this.players = [owner]
+    this.logic = null;
   }
 
   wypisanie() {
@@ -175,6 +177,10 @@ app.get("/game/:id/join", async (req, res) => {
     return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
   }
 
+  if(game.players.length >= 4){
+    return res.status(400).send("Gra jest pelna!");
+}
+
   game.players.push(currentlyLogged);
   res.send(`Dołączono do gry ${game.id}!`);
 
@@ -199,8 +205,13 @@ app.get("/game/:id/start", async (req, res) => {
       res.send(`Nie ma gry o ID ${id}!`);
     }else{
       if(gameToStart.owner.username == currentlyLogged.username){
-        res.send(`Rozpoczęto grę o ID ${id}`);
-        gameToStart.round = 1;
+          if(gameToStart.players.length < 2){
+              res.send(`Potrzeba minimum 2 graczy!`);
+          }else{
+              gameToStart.round = 1;
+              gameToStart.logic = new GameLogic(gameToStart.players.length);
+              res.send(`Rozpoczęto grę o ID ${id}`);
+          }
       }else{
         res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
       }
