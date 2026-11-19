@@ -5,6 +5,8 @@ import path from 'path';
 import { randomBytes, randomUUID } from "node:crypto";
 
 import authRouter from './routes/auth.js'
+import { randomBytes } from "node:crypto";
+import { WebSocketServer } from "ws";
 
 class User{
   constructor(id, username, email, password_hash){
@@ -251,6 +253,15 @@ app.get("/game/:id/start", async (req, res) => {
   }
 
   logState();
+});
+
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (client) => {
+  client.send('Siema');
+  client.on('message', (msg) => {
+    console.log(`${msg}`);
+  });
 });
 
 server.listen(PORT, () => { 

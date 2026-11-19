@@ -1,0 +1,11 @@
+01. Użytkownik musi się zarejestrować (/register)
+
+02. Użytkownik potem się loguje (/login)
+
+03. Użytkownik tworzy grę (/newGame) albo dołącza do już istniejącej (/game/:id/join)
+
+04. Jeżeli w istniejącej grze jest min. 2 użytkowników można rozpocząć grę (/game/:id/start)
+
+// Logika gry od Daniela
+
+05. Użytkownik wylogowuje się (/logout)
