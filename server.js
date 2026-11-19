@@ -5,7 +5,7 @@ import path from 'path';
 import { randomBytes, randomUUID } from "node:crypto";
 
 import authRouter from './routes/auth.js'
-import { randomBytes } from "node:crypto";
+
 import { WebSocketServer } from "ws";
 
 class User{
