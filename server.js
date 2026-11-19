@@ -4,6 +4,7 @@ import http from 'http';
 import path from 'path';
 import { randomBytes, randomUUID } from "node:crypto";
 
+import authRouter from './routes/auth.js'
 
 class User{
   constructor(id, username, email, password_hash){
@@ -75,48 +76,53 @@ const PORT = 3000;
 
 app.use(express.json())
 
+app.use('/api/auth', authRouter)
+
 app.get("/", (req, res) => {
   res.send("Lets play some chinese guy!");
 });
 
-app.get("/register", async (req, res) => {
-  const {id, username, email, password_hash } = req.query;
-  let newUser = new User(id, username, email, password_hash);
-  users.push(newUser); 
-  res.send(`Witaj ${newUser.username}! Znam twoje hasło ${newUser.password_hash}`);
+// app.get("/register", async (req, res) => {
+//   const {id, username, email, password_hash } = req.query;
+//   let newUser = new User(id, username, email, password_hash);
+//   users.push(newUser); 
+//   res.send(`Witaj ${newUser.username}! Znam twoje hasło ${newUser.password_hash}`);
 
-  logState();
-});
+//   logState();
+// });
 
-app.get("/login", async (req, res) =>{
-  const {username, password} = req.query;
+// app.get("/login", async (req, res) =>{
+//   const {username, password} = req.query;
 
-  if(loggedIn == true){
-    res.send(`Już jesteś zalogowany ${username}`)
-  }else{
-    let userFound = users.find(x => x.username === username);
+//   if(loggedIn == true){
+//     res.send(`Już jesteś zalogowany ${username}`)
+//   }else{
+//     let userFound = users.find(x => x.username === username);
 
-    // users.forEach((x) => {
-    //   if(x.username == username){
-    //     userFound = x;
-    //   }
-    // });
+//     // users.forEach((x) => {
+//     //   if(x.username == username){
+//     //     userFound = x;
+//     //   }
+//     // });
 
-    if(!userFound){
-      res.send(`Nie znaleziono użytkownika o nazwie ${username}`);
-    }else{
-      if(userFound.password_hash == password){
-        loggedIn = true;
-        currentlyLogged = userFound;
-        res.send(`Witaj ${username}! Zacznijmy rozgrywkę!`);
-      }else{
-        res.send(`Niepoprawne hasło!`);
-      }
-    }
-  }
+//     if(!userFound){
+//       res.send(`Nie znaleziono użytkownika o nazwie ${username}`);
+//     }else{
+//       if(userFound.password_hash == password){
+//         loggedIn = true;
+//         currentlyLogged = userFound;
+//         res.send(`Witaj ${username}! Zacznijmy rozgrywkę!`);
+//       }else{
+//         res.send(`Niepoprawne hasło!`);
+//       }
+//     }
+//   }
 
-  logState();
-});
+//   logState();
+// });
+
+
+
 
 app.get("/logout", async (req, res) =>{
   currentlyLogged = null;
