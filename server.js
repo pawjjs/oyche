@@ -4,70 +4,139 @@ import http from 'http';
 import path from 'path';
 import { randomBytes } from "node:crypto";
 import { WebSocketServer } from "ws";
+<<<<<<< Updated upstream
+=======
+import GameLogic from "./gameLogic.js";
+import auth from "./routes/auth.js";
+>>>>>>> Stashed changes
 
-class User{
-  constructor(id, username, email, password_hash){
-    this.id = id;
-    this.username = username;
-    this.email = email;
-    this.password_hash = password_hash;
-  }
+// let games = [];
+// let loggedIn = false;
+// let currentlyLogged;
 
-  wypisanie() {
-    console.log("ID: " + this.id);
-    console.log("Username: " + this.username);
-    console.log("Email: " + this.email);
-  }
-}
+// function logState() {
+//   console.log("==============================");
+//   console.log("Użytkownicy:");
+//   users.forEach(u => u.wypisanie());
 
-class Game{
-  // constructor(id, user){
-  //   this.id = id;
-  //   this.round = 0;
-  //   this.user = user;
-  // }
+//   console.log("Gry:");
+//   games.forEach(g => g.wypisanie());
 
+<<<<<<< Updated upstream
   constructor(id, owner){
     this.id = id;
     this.round = 0;
     this.owner = owner
     this.players = [owner]
   }
+=======
+//   console.log("Zalogowany:");
+//   if (currentlyLogged) {
+//     currentlyLogged.wypisanie()
+//   }
+//   else {
+//     console.log("-----");
+//   }
+>>>>>>> Stashed changes
 
-  wypisanie() {
-    console.log("ID: " + this.id);
-    console.log("Runda: " + this.round);
-    // console.log("Właściciel: ");
-    // this.user.wypisanie();
-    console.log(`Wlasciciel: ${this.owner.username}`)
-    console.log(`Gracze: ${this.players.map(p => p.username)}`)
-  }
-}
+//   console.log("Czy zalogowany?: " + loggedIn);
+//   console.log("==============================");
+// }
 
-let users = [];
-let games = [];
-let loggedIn = false;
-let currentlyLogged;
+// function generatorKodow(){
+//   return randomBytes(3).toString('hex');
+// }
 
-function logState() {
-  console.log("==============================");
-  console.log("Użytkownicy:");
-  users.forEach(u => u.wypisanie());
+// app.get("/newGame", async (req, res) => {
+//   const wygenerowanyKod = generatorKodow()
 
-  console.log("Gry:");
-  games.forEach(g => g.wypisanie());
+//   if(loggedIn == false){
+//     res.send(`Zaloguj się!!!`);
+//   }else{
+//     // const {id} = req.query;
+//     let isExisting = false;
+//     games.forEach(singleGame => {
+//       if(singleGame.id == wygenerowanyKod){
+//         isExisting = true;
+//       }
+//     });
 
-  console.log("Zalogowany:");
-  if (currentlyLogged) {
-    currentlyLogged.wypisanie()
-  }
-  else {
-    console.log("-----");
-  }
+//     if (isExisting == false){
+//       games.push(new Game(wygenerowanyKod, currentlyLogged));
+//       res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
+//     }else{
+//       res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
+//     }
+//   }
+  
+//   logState();
+// });
 
-  console.log("Czy zalogowany?: " + loggedIn);
-  console.log("==============================");
-}
+// app.get("/game/:id/join", async (req, res) => {
+//   const {id} = req.params;
+  
+//   const game = games.find(g => g.id === id) 
+
+//   if(!loggedIn){
+//     return res.status(401).send("Nie jestes zalogowany!");
+//   }
+
+//   if(!game){
+//     return res.status(404).send("Nie ma takiej gry!");
+//   }
+
+//   if(game.players.find(p => p === currentlyLogged)){
+//     return res.status(400).send("Juz dolaczyles!");
+//   }
+
+//   //tymczasowe
+//   if(game.round > 0){
+//     return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
+//   }
+
+//   if(game.players.length >= 4){
+//     return res.status(400).send("Gra jest pelna!");
+// }
+
+//   game.players.push(currentlyLogged);
+//   res.send(`Dołączono do gry ${game.id}!`);
+
+//   logState()
+// })
+
+// app.get("/game/:id/start", async (req, res) => {
+//   if(loggedIn == false){
+//     res.send(`Na początek się zaloguj!`);
+//   }else{
+//     const {id} = req.params;
+//     let isExisting = false;
+//     let gameToStart = {};
+//     games.forEach(singleGame => {
+//       if(singleGame.id == id){
+//         isExisting = true;
+//         gameToStart = singleGame;
+//       }
+//     });
+
+//     if (isExisting == false){
+//       res.send(`Nie ma gry o ID ${id}!`);
+//     }else{
+//       if(gameToStart.owner.username == currentlyLogged.username){
+//           if(gameToStart.players.length < 2){
+//               res.send(`Potrzeba minimum 2 graczy!`);
+//           }else{
+//               gameToStart.round = 1;
+//               gameToStart.logic = new GameLogic(gameToStart.players.length);
+//               res.send(`Rozpoczęto grę o ID ${id}`);
+//           }
+//       }else{
+//         res.send(`Ta gra nie należy do Ciebie! Nie możesz jej rozpocząć!`);
+//       }
+//     }
+//   }
+
+//   logState();
+// });
 
 const app = express();
 const server = http.createServer(app)
@@ -77,6 +146,7 @@ app.get("/", (req, res) => {
   res.send("Lets play some chinese guy!");
 });
 
+<<<<<<< Updated upstream
 app.get("/register", async (req, res) => {
   const {id, username, email, password_hash } = req.query;
   let newUser = new User(id, username, email, password_hash);
@@ -209,6 +279,12 @@ app.get("/game/:id/start", async (req, res) => {
 
   logState();
 });
+=======
+// Obsługa JSONa
+app.use(express.json())
+// Router dla auth
+app.use(auth);
+>>>>>>> Stashed changes
 
 const wss = new WebSocketServer({ server });
 
