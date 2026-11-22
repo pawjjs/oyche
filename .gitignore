@@ -26,6 +26,7 @@ coverage
 .vscode/*
 !.vscode/extensions.json
 .idea
+*.iml
 *.suo
 *.ntvs*
 *.njsproj
@@ -45,3 +46,14 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# SQLite database and WAL/SHM files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Local notes
+Przebieg.txt

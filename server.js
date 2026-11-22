@@ -1,10 +1,9 @@
 import express from "express";
-import db from "./db.js"; 
 import http from 'http';
 import path from 'path';
 import { randomBytes } from "node:crypto";
 import { WebSocketServer } from "ws";
-
+import gameRoutes from './routes/gameRoutes.js';
 class User{
   constructor(id, username, email, password_hash){
     this.id = id;
@@ -128,58 +127,60 @@ function generatorKodow(){
   return randomBytes(3).toString('hex');
 }
 
-app.get("/newGame", async (req, res) => {
-  const wygenerowanyKod = generatorKodow()
-
-  if(loggedIn == false){
-    res.send(`Zaloguj się!!!`);
-  }else{
-    // const {id} = req.query;
-    let isExisting = false;
-    games.forEach(singleGame => {
-      if(singleGame.id == wygenerowanyKod){
-        isExisting = true;
-      }
-    });
-
-    if (isExisting == false){
-      games.push(new Game(wygenerowanyKod, currentlyLogged));
-      res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
-    }else{
-      res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
-    }
-  }
-  
-  logState();
-});
-
-app.get("/game/:id/join", async (req, res) => {
-  const {id} = req.params;
-  
-  const game = games.find(g => g.id === id) 
-
-  if(!loggedIn){
-    return res.status(401).send("Nie jestes zalogowany!");
-  }
-
-  if(!game){
-    return res.status(404).send("Nie ma takiej gry!");
-  }
-
-  if(game.players.find(p => p === currentlyLogged)){
-    return res.status(400).send("Juz dolaczyles!");
-  }
-
-  //tymczasowe
-  if(game.round > 0){
-    return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
-  }
-
-  game.players.push(currentlyLogged);
-  res.send(`Dołączono do gry ${game.id}!`);
-
-  logState()
-})
+// app.get("/newGame", async (req, res) => {
+//   const wygenerowanyKod = generatorKodow()
+//
+//   if(loggedIn == false){
+//     res.send(`Zaloguj się!!!`);
+//   }else{
+//     // const {id} = req.query;
+//     let isExisting = false;
+//     games.forEach(singleGame => {
+//       if(singleGame.id == wygenerowanyKod){
+//         isExisting = true;
+//       }
+//     });
+//
+//     if (isExisting == false){
+//       games.push(new Game(wygenerowanyKod, currentlyLogged));
+//       res.send(`Stworzono grę o ID ${wygenerowanyKod} i należy ona do ${currentlyLogged.username}!`);
+//     }else{
+//       res.send(`Gra o ID ${wygenerowanyKod} już istnieje!`);
+//     }
+//   }
+//
+//   logState();
+// });
+// ///
+app.use('/createGame', gameRoutes);
+app.use('/joinGame', gameRoutes);
+// app.get("/game/:id/join", async (req, res) => {
+//   const {id} = req.params;
+//
+//   const game = games.find(g => g.id === id)
+//
+//   if(!loggedIn){
+//     return res.status(401).send("Nie jestes zalogowany!");
+//   }
+//
+//   if(!game){
+//     return res.status(404).send("Nie ma takiej gry!");
+//   }
+//
+//   if(game.players.find(p => p === currentlyLogged)){
+//     return res.status(400).send("Juz dolaczyles!");
+//   }
+//
+//   //tymczasowe
+//   if(game.round > 0){
+//     return res.status(400).send("Gra sie juz rozpoczela. Nie mozna do niej dolaczyc");
+//   }
+//
+//   game.players.push(currentlyLogged);
+//   res.send(`Dołączono do gry ${game.id}!`);
+//
+//   logState()
+// })
 
 app.get("/game/:id/start", async (req, res) => {
   if(loggedIn == false){
