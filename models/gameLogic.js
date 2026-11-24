@@ -1,6 +1,7 @@
 import Player from "./player.js";
 
-export default class Game {
+// zmieniłem nazwę klasy z Game na GameLogic bo w server.js mamy już Game, precezyjniejsza nazwa
+export default class GameLogic {
     constructor(playerCount = 2) {
         this.boardSize = 40;
         this.players = [];
@@ -14,6 +15,8 @@ export default class Game {
     }
 
     rollTheDice() {
+        // Było wszędzie player.color, zmieniłem na player.name, bo w klasie Player nie ma color a jest name
+        // Nazwą gracza (name) jest w sumie color
         let player = this.players[this.currentTurnIndex];
         let roll = Math.floor(Math.random() * 6) + 1;
         let message = '';
@@ -21,16 +24,16 @@ export default class Game {
         if (player.position === -1) {
             if (roll === 6) {
                 player.position = 0;
-                message = `${player.colors} wyrzucil 6,opuscil baze`;
+                message = `${player.name} wyrzucil 6,opuscil baze`;
                 this.checkCapture(player);
             } else {
-                message = `${player.color} wyrzucil ${roll} (musisz wyrzucic 6)`;
+                message = `${player.name} wyrzucil ${roll} (musisz wyrzucic 6)`;
             }
         } else {
             let oldPos = player.position;
             let newPos = (player.position + roll) % this.boardSize;
             player.position = newPos;
-            message = `${player.colors} przesunal sie z ${oldPos} na ${newPos} (rzut: ${roll}).`;
+            message = `${player.name} przesunal sie z ${oldPos} na ${newPos} (rzut: ${roll}).`;
             this.checkCapture(player);
         }
 
@@ -38,12 +41,14 @@ export default class Game {
 
         if (this.currentTurnIndex >= this.players.length) {
             this.currentTurnIndex = 0;
+            //brakowało nawiasu zamykającego w if
+        }
 
         return { roll, message, players: this.players, turn: this.currentTurnIndex };
     }
-}
 
-checkCapture(movingPlayer) {
+    // Wrzuciłem checkCapture do klasy
+    checkCapture(movingPlayer) {
         let victim = null;
         for (let i = 0; i < this.players.length; i++) {
             let p = this.players[i];

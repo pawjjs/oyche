@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 
+export let currentlyLogged = null;
 let users = [];
 // licznik id dla użytkowników
 let idForUser = 1;
@@ -35,21 +36,13 @@ export function register(username, email, password_hash) {
     return newUser;
 }
 
-// Do zrobienia
+// Było
 // app.get("/login", async (req, res) =>{
 //   const {username, password} = req.query;
-
 //   if(loggedIn == true){
 //     res.send(`Już jesteś zalogowany ${username}`)
 //   }else{
 //     let userFound = users.find(x => x.username === username);
-
-//     // users.forEach((x) => {
-//     //   if(x.username == username){
-//     //     userFound = x;
-//     //   }
-//     // });
-
 //     if(!userFound){
 //       res.send(`Nie znaleziono użytkownika o nazwie ${username}`);
 //     }else{
@@ -62,10 +55,30 @@ export function register(username, email, password_hash) {
 //       }
 //     }
 //   }
-
 //   logState();
 // });
 
+// Jest
+export function login(username, password) {
+    if(currentlyLogged!==null){
+        return null;
+    }else{
+        const userFound = users.find(u => u.username === username);
+
+        if (!userFound) {
+            return null;
+        }else{
+            if (userFound.password_hash == password) {
+                currentlyLogged = userFound;
+                return userFound;
+            }else{
+                return null;
+            }
+        }        
+    }
+}
+
+// Było
 // app.get("/logout", async (req, res) =>{
 //   currentlyLogged = null;
 //   loggedIn = false;
@@ -73,3 +86,9 @@ export function register(username, email, password_hash) {
 
 //   logState();
 // });
+
+// Jest
+export function logout() {
+    currentlyLogged = null;
+    return true;
+}

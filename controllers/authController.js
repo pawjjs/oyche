@@ -21,3 +21,38 @@ export function register(req, res) {
     // Status 201 Created
     res.status(201).json(newUser);
 }
+
+export function login(req, res) {
+    const {username, password} = req.body;
+    const userFound = authService.login(username, password);
+
+    if (!userFound) {
+        // Status 401 Unauthorized
+        return res.status(401).json({
+            error: {
+                code: "LOGIN_FAILED",
+                message: "Nie udało się zalogować użytkownika."
+            }
+        });
+    }
+
+    // Status 200 OK
+    res.status(200).json(userFound);
+}
+
+export function logout(req, res) {
+    const result = authService.logout();
+
+    if(!result) {
+        // Status 400 Bad Request
+        return res.status(400).json({
+            error: {
+                code: "LOGOUT_FAILED",
+                message: "Nie udało się wylogować użytkownika."
+            }
+        });
+    }
+
+    // Status 200 OK
+    res.status(200).json(result);
+}

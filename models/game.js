@@ -1,4 +1,4 @@
-class Game{
+export default class Game{
   // constructor(id, user){
   //   this.id = id;
   //   this.round = 0;
